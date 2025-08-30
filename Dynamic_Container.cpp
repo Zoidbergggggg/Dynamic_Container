@@ -1,129 +1,115 @@
 ﻿#include <iostream>
 
-void create_vector(int*& vec, const unsigned size, const int valueByDefault = 0)
+class  MyVector
 {
-	if (vec != nullptr)
+public:
+	MyVector(const unsigned size, const int valueByDefault = 0)
+
 	{
-		delete[] vec;
-	}
-	vec = new int[size];
-	for (int count = 0; count < size; count++) 
-	{
-		vec[count] = valueByDefault;
+		m_size = size;
+		vec = create_vector(size, valueByDefault);
 	}
 
-}
-int* create_vector(const unsigned size, const int valueByDefault = 0)
-{
-	int* vec = new int[size];
-	for (int count = 0; count < size; count++) 
+	~MyVector()
 	{
-		vec[count] = valueByDefault;
+		delete_vector(vec);
 	}
-	return vec;
-}
-void delete_vector(int* vec)
-{
-	if (vec != nullptr)
+
+	void push_back(const int newValue)
 	{
-		delete[] vec;
-		vec = nullptr;
+		int* copy = create_vector(m_size + 1);
+		copy_vector(copy, vec, m_size);
+		copy[m_size] = newValue;
+
+		delete_vector(vec);
+		vec = copy;
+		m_size = m_size + 1;
+
 	}
-}
-void copy_vector(int* const to, const int* const from, const unsigned size)
-{
-	for (int count = 0; count < size; count++)
+
+	int& operator[](const unsigned index)
 	{
-		 to[count] = from[count];
+		return vec[index];
 	}
-}
-void push_back_in_vector(int*& vec, const unsigned size, const int newValue)
-{
-	int* copy = create_vector(size + 1);
-	copy_vector(copy, vec, size);
-	copy[size] = newValue;
 
-	delete_vector(vec);
-	vec = copy;
+	void swap_items(const unsigned aIndex, const unsigned bIndex)
+	{
+		int temp = vec[aIndex];
+		vec[aIndex] = vec[bIndex];
+		vec[bIndex] = temp;
+	}
 
-}
-int& at_vector(int* const vec, const unsigned index)
-{
+	size_t Get_size()
+	{
+		return m_size;
+	}
 
-	return vec[index];
+	MyVector(const MyVector&) = delete;
+	MyVector operator =(const MyVector&) = delete;
 
-}
 
-void swap_items(int& a, int& b)
-{
-	int temp = a;
-	a = b;
-	b = temp;
-}
-void swap_items(int* const a, int* const b)
-{
-	int temp = *a;
-	*a = *b;
-	*b = temp;
-}
-void swap_items(int* const vec, const unsigned aIndex, const unsigned bIndex)
-{
-	int& a = at_vector(vec,aIndex);
-	int& b = at_vector(vec,bIndex);
-	swap_items(a, b);
-}
+private:
+	size_t m_size;
+	int* vec = nullptr;
 
-void Print_Vec(const int* const vec, size_t size)
+	int* create_vector(const unsigned size, const int valueByDefault = 0)
+	{
+		int* vec = new int[size];
+		for (int count = 0; count < size; count++)
+		{
+			vec[count] = valueByDefault;
+		}
+		return vec;
+	}
+	void delete_vector(int* vec)
+	{
+		if (vec != nullptr)
+		{
+			delete[] vec;
+			vec = nullptr;
+		}
+	}
+	void copy_vector(int* const to, const int* const from, const unsigned size)
+	{
+		for (int count = 0; count < size; count++)
+		{
+			to[count] = from[count];
+		}
+	}
+};
+
+
+void Print_Vec(MyVector& vec)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < vec.Get_size(); i++)
 	{
 		std::cout << vec[i] << " ";
 	}
 	std::cout << std::endl;
-
 }
 
 int main()
 {
 	size_t size = 5;
-	int* vec1 = nullptr;
-	create_vector(vec1, size, 2);
-
-	int* vec2 = create_vector(size, 3);
+	MyVector vec(size, 2);
+	MyVector vec1(size, 3);
 
 	std::cout << "Vector 1 is: ";
-	Print_Vec(vec1, size);
+	Print_Vec(vec);
 	std::cout << std::endl;
 	std::cout << "Vector 2 is: ";
-	Print_Vec(vec2, size);
+	Print_Vec(vec1);
 	std::cout << "\n";
 
-	copy_vector(vec1, vec2, size);
+	vec.push_back(89);
+
 	std::cout << "Vector 1 is: ";
-	Print_Vec(vec1, size);
+	Print_Vec(vec);
 	std::cout << std::endl;
 
-	delete_vector(vec2);
-
-	push_back_in_vector(vec1, size, 89);
-	size++;
-	
+	vec.swap_items(5, 3);
 	std::cout << "Vector 1 is: ";
-	Print_Vec(vec1, size);
-	std::cout << std::endl;
-
-	swap_items(vec1, 5, 3);
-	std::cout << "Vector 1 is: ";
-	Print_Vec(vec1, size);
-	std::cout << std::endl;
-
-	int* a = &at_vector(vec1, 3);
-	int* b = &at_vector(vec1, 4);
-	
-	swap_items(a, b);
-
-	std::cout << "Vector 1 is: ";
-	Print_Vec(vec1, size);
+	Print_Vec(vec);
 	std::cout << std::endl;
 
 	return 0;
