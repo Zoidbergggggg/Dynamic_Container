@@ -7,7 +7,24 @@ public:
 
 	{
 		m_size = size;
+		capacity = size;
 		vec = create_vector(size, valueByDefault);
+	}
+	MyVector(const MyVector& copyVector)
+	{
+		m_size = copyVector.m_size;
+		capacity = m_size;
+		vec = create_vector(m_size);
+		copy_vector(vec, copyVector.vec, m_size);
+	}
+	MyVector& operator=(const MyVector& copyVector)
+	{
+		delete_vector(vec);
+		m_size = copyVector.m_size;
+		capacity = m_size;
+		vec = create_vector(m_size);
+		copy_vector(vec, copyVector.vec, m_size);
+		return *this;
 	}
 
 	~MyVector()
@@ -17,14 +34,17 @@ public:
 
 	void push_back(const int newValue)
 	{
-		int* copy = create_vector(m_size + 1);
-		copy_vector(copy, vec, m_size);
-		copy[m_size] = newValue;
-
-		delete_vector(vec);
-		vec = copy;
+		if (m_size >= capacity)
+		{
+			capacity *= 2;
+			int* copy = create_vector(capacity);
+			copy_vector(copy, vec, m_size);
+			delete_vector(vec);
+			vec = copy;
+			std::cout << "Now your capacity is " << capacity << "\n\n";
+		}
+		vec[m_size] = newValue;
 		m_size = m_size + 1;
-
 	}
 
 	int& operator[](const unsigned index)
@@ -44,13 +64,14 @@ public:
 		return m_size;
 	}
 
-	MyVector(const MyVector&) = delete;
-	MyVector operator =(const MyVector&) = delete;
+	MyVector(MyVector&&) = delete;
+	MyVector& operator= (MyVector&&) = delete;
 
 
 private:
 	size_t m_size;
 	int* vec = nullptr;
+	size_t capacity;
 
 	int* create_vector(const unsigned size, const int valueByDefault = 0)
 	{
@@ -101,7 +122,8 @@ int main()
 	Print_Vec(vec1);
 	std::cout << "\n";
 
-	vec.push_back(89);
+	vec.push_back(89); 
+	vec.push_back(15);
 
 	std::cout << "Vector 1 is: ";
 	Print_Vec(vec);
@@ -110,6 +132,17 @@ int main()
 	vec.swap_items(5, 3);
 	std::cout << "Vector 1 is: ";
 	Print_Vec(vec);
+	std::cout << std::endl;
+
+	MyVector vec2(vec);
+
+	std::cout << "Your new vector is: ";
+	Print_Vec(vec2);
+	std::cout << std::endl;
+
+	vec1 = vec2;
+	std::cout << "Vector 1: ";
+	Print_Vec(vec1);
 	std::cout << std::endl;
 
 	return 0;
